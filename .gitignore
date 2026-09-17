@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+.generated/
+.codex-runtime/
+
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+.DS_Store
+*.log
