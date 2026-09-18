@@ -1,7 +1,5 @@
 # 진행 상태
 
-최종 커밋: 4eb25f9 feat: add Codex Azure OpenAI proxy
-
 원격 저장소: https://github.com/redjuno/codex-azure-openai-proxy
 
 ## 완료된 작업

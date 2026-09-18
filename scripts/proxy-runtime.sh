@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Sourced after ensure-env.sh by the launcher, but also run directly by
-# make status/stop, where ROOT_DIR is not exported yet.
-ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+# Always this repo, never an inherited ROOT_DIR: make status/stop run this
+# file directly and must not read another checkout's runtime directory.
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 RUNTIME_DIR="${CODEX_AZURE_RUNTIME_DIR:-${ROOT_DIR}/.codex-runtime}"
 RUNTIME_LOCK_DIR="${RUNTIME_DIR}/lock"
