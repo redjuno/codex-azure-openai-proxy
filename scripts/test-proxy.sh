@@ -7,7 +7,9 @@ BASE_URL="http://${LITELLM_HOST}:${LITELLM_PORT}"
 
 printf 'Testing OpenAI Responses endpoint: %s/v1/responses\n' "${BASE_URL}"
 
-for model_alias in "${CODEX_MODEL_OPUS_ALIAS}" "${CODEX_MODEL_FABLE_ALIAS}"; do
+for model_key in "${CODEX_MODEL_KEYS[@]}"; do
+  alias_var="CODEX_MODEL_${model_key}_ALIAS"
+  model_alias="${!alias_var}"
   printf '\n-- %s\n' "${model_alias}"
   curl -sS "${BASE_URL}/v1/responses" \
     -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" \

@@ -41,12 +41,12 @@ trap 'forward_signal HUP' HUP
 proxy_session_acquire "${session_id}" || exit 1
 session_acquired=1
 
-printf 'Launching Codex via LiteLLM: %s, model=%s\n' "${OPENAI_BASE_URL}" "${CODEX_MODEL_OPUS_ALIAS}"
+printf 'Launching Codex via LiteLLM: %s, model=%s\n' "${OPENAI_BASE_URL}" "${CODEX_DEFAULT_MODEL}"
 
 set +e
 codex \
   -c 'model_provider="codex-azure"' \
-  -c "model=\"${CODEX_MODEL_OPUS_ALIAS}\"" \
+  -c "model=\"${CODEX_DEFAULT_MODEL}\"" \
   -c 'model_providers.codex-azure.name="Local Azure OpenAI"' \
   -c "model_providers.codex-azure.base_url=\"${OPENAI_BASE_URL}\"" \
   -c 'model_providers.codex-azure.env_key="OPENAI_API_KEY"' \

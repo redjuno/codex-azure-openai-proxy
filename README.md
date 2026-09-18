@@ -30,15 +30,17 @@ AZURE_API_KEY=your-azure-openai-key
 AZURE_API_BASE=https://your-resource.openai.azure.com
 AZURE_API_VERSION=2025-03-01-preview
 
-AZURE_DEPLOYMENT_OPUS=your-primary-deployment
-AZURE_DEPLOYMENT_FABLE=your-secondary-deployment
+AZURE_DEPLOYMENT_SOL=your-gpt-56-sol-deployment
+AZURE_DEPLOYMENT_ASTRA=your-gpt-6-astra-deployment
+AZURE_DEPLOYMENT_LUNA=your-gpt-56-luna-deployment
 
 LITELLM_HOST=127.0.0.1
 LITELLM_PORT=4020
 LITELLM_MASTER_KEY=sk-local-codex-proxy
 
-CODEX_MODEL_OPUS_ALIAS=opus
-CODEX_MODEL_FABLE_ALIAS=fable
+CODEX_MODEL_SOL_ALIAS=gpt-5.6-sol
+CODEX_MODEL_ASTRA_ALIAS=gpt-6-astra
+CODEX_MODEL_LUNA_ALIAS=gpt-5.6-luna
 ```
 
 연결과 lifecycle을 확인합니다.
@@ -70,7 +72,19 @@ codex-azure
 
 기존 `~/.codex/config.toml`, 인증 정보, 플러그인, 권한 설정은 수정하지 않습니다.
 
-두 Azure deployment는 LiteLLM alias로 노출됩니다. 기본 모델은 `CODEX_MODEL_OPUS_ALIAS`이며, Codex 인자에 `-m`을 주면 해당 값을 사용합니다.
+세 Azure deployment가 LiteLLM alias로 노출됩니다.
+
+| `.env` 키 | Azure deployment | Codex가 보는 모델 이름 |
+| --- | --- | --- |
+| `AZURE_DEPLOYMENT_SOL` | `gpt-sol` | `CODEX_MODEL_SOL_ALIAS` (기본 `gpt-5.6-sol`) |
+| `AZURE_DEPLOYMENT_ASTRA` | `gpt-astra` | `CODEX_MODEL_ASTRA_ALIAS` (기본 `gpt-6-astra`) |
+| `AZURE_DEPLOYMENT_LUNA` | `gpt-luna` | `CODEX_MODEL_LUNA_ALIAS` (기본 `gpt-5.6-luna`) |
+
+`-m` 없이 실행하면 SOL alias를 사용합니다. 다른 모델은 `codex-azure -m gpt-6-astra`처럼 지정합니다.
+
+모델을 추가하려면 `.env`에 `AZURE_DEPLOYMENT_<KEY>`와 `CODEX_MODEL_<KEY>_ALIAS`를 넣고, `scripts/ensure-env.sh`의 `CODEX_MODEL_KEYS`에 키를 추가한 뒤 `config/litellm.config.yaml`에 같은 형태의 블록을 하나 더 둡니다.
+
+Codex TUI의 `/model` 목록에는 이 alias들이 뜨지 않습니다. Codex가 프록시의 `/v1/models`를 조회하지만 `{"models": [...]}` 형태를 기대하고, LiteLLM은 OpenAI 표준인 `{"data": [...]}`로 응답하기 때문입니다. `-m`으로 지정하는 경로는 정상 동작합니다.
 
 수동 실행도 가능합니다.
 
