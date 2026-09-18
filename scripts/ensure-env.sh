@@ -14,14 +14,19 @@ set -a
 source "${ENV_FILE}"
 set +a
 
+# Every model this proxy exposes. Each key needs AZURE_DEPLOYMENT_<KEY> in .env
+# and maps to the Codex-visible alias CODEX_MODEL_<KEY>_ALIAS.
+CODEX_MODEL_KEYS=(SOL ASTRA LUNA)
+
 required_vars=(
   AZURE_API_KEY
   AZURE_API_BASE
   AZURE_API_VERSION
-  AZURE_DEPLOYMENT_OPUS
-  AZURE_DEPLOYMENT_FABLE
   LITELLM_MASTER_KEY
 )
+for model_key in "${CODEX_MODEL_KEYS[@]}"; do
+  required_vars+=("AZURE_DEPLOYMENT_${model_key}")
+done
 
 missing=()
 for var_name in "${required_vars[@]}"; do
@@ -45,5 +50,9 @@ fi
 export ROOT_DIR
 export LITELLM_HOST="${LITELLM_HOST:-127.0.0.1}"
 export LITELLM_PORT="${LITELLM_PORT:-4020}"
-export CODEX_MODEL_OPUS_ALIAS="${CODEX_MODEL_OPUS_ALIAS:-opus}"
-export CODEX_MODEL_FABLE_ALIAS="${CODEX_MODEL_FABLE_ALIAS:-fable}"
+export CODEX_MODEL_SOL_ALIAS="${CODEX_MODEL_SOL_ALIAS:-gpt-5.6-sol}"
+export CODEX_MODEL_ASTRA_ALIAS="${CODEX_MODEL_ASTRA_ALIAS:-gpt-6-astra}"
+export CODEX_MODEL_LUNA_ALIAS="${CODEX_MODEL_LUNA_ALIAS:-gpt-5.6-luna}"
+
+# Model used when codex-azure runs without -m.
+export CODEX_DEFAULT_MODEL="${CODEX_MODEL_SOL_ALIAS}"

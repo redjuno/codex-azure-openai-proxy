@@ -16,17 +16,22 @@ if [[ -n "${NODE_EXTRA_CA_CERTS:-}" ]]; then
   export UV_NATIVE_TLS=true
 fi
 
-sed \
-  -e "s#__AZURE_DEPLOYMENT_OPUS__#${AZURE_DEPLOYMENT_OPUS}#g" \
-  -e "s#__AZURE_DEPLOYMENT_FABLE__#${AZURE_DEPLOYMENT_FABLE}#g" \
-  -e "s#__CODEX_MODEL_OPUS_ALIAS__#${CODEX_MODEL_OPUS_ALIAS}#g" \
-  -e "s#__CODEX_MODEL_FABLE_ALIAS__#${CODEX_MODEL_FABLE_ALIAS}#g" \
-  "${ROOT_DIR}/config/litellm.config.yaml" > "${GENERATED_CONFIG}"
+sed_script=()
+for model_key in "${CODEX_MODEL_KEYS[@]}"; do
+  deployment_var="AZURE_DEPLOYMENT_${model_key}"
+  alias_var="CODEX_MODEL_${model_key}_ALIAS"
+  sed_script+=(-e "s#__${deployment_var}__#${!deployment_var}#g")
+  sed_script+=(-e "s#__${alias_var}__#${!alias_var}#g")
+done
+
+sed "${sed_script[@]}" "${ROOT_DIR}/config/litellm.config.yaml" > "${GENERATED_CONFIG}"
 
 printf 'Starting LiteLLM proxy on http://%s:%s\n' "${LITELLM_HOST}" "${LITELLM_PORT}"
-printf 'Exposing %s -> azure/%s, %s -> azure/%s\n' \
-  "${CODEX_MODEL_OPUS_ALIAS}" "${AZURE_DEPLOYMENT_OPUS}" \
-  "${CODEX_MODEL_FABLE_ALIAS}" "${AZURE_DEPLOYMENT_FABLE}"
+for model_key in "${CODEX_MODEL_KEYS[@]}"; do
+  deployment_var="AZURE_DEPLOYMENT_${model_key}"
+  alias_var="CODEX_MODEL_${model_key}_ALIAS"
+  printf 'Exposing %s -> azure/%s\n' "${!alias_var}" "${!deployment_var}"
+done
 printf 'Azure API version: %s\n' "${AZURE_API_VERSION}"
 
 exec uvx \

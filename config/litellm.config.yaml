@@ -7,9 +7,9 @@
 # bridges to /responses on its own for deployment names it recognises as
 # gpt-5.4+, which these are not.
 model_list:
-  - model_name: __CODEX_MODEL_OPUS_ALIAS__
+  - model_name: __CODEX_MODEL_SOL_ALIAS__
     litellm_params:
-      model: azure/responses/__AZURE_DEPLOYMENT_OPUS__
+      model: azure/responses/__AZURE_DEPLOYMENT_SOL__
       api_key: os.environ/AZURE_API_KEY
       api_base: os.environ/AZURE_API_BASE
       api_version: os.environ/AZURE_API_VERSION
@@ -18,9 +18,18 @@ model_list:
       # instead of max_completion_tokens and Azure rejects the request.
       base_model: azure/gpt-5
 
-  - model_name: __CODEX_MODEL_FABLE_ALIAS__
+  - model_name: __CODEX_MODEL_ASTRA_ALIAS__
     litellm_params:
-      model: azure/responses/__AZURE_DEPLOYMENT_FABLE__
+      model: azure/responses/__AZURE_DEPLOYMENT_ASTRA__
+      api_key: os.environ/AZURE_API_KEY
+      api_base: os.environ/AZURE_API_BASE
+      api_version: os.environ/AZURE_API_VERSION
+    model_info:
+      base_model: azure/gpt-5
+
+  - model_name: __CODEX_MODEL_LUNA_ALIAS__
+    litellm_params:
+      model: azure/responses/__AZURE_DEPLOYMENT_LUNA__
       api_key: os.environ/AZURE_API_KEY
       api_base: os.environ/AZURE_API_BASE
       api_version: os.environ/AZURE_API_VERSION

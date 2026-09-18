@@ -14,13 +14,15 @@ cat >"${ENV_FILE}" <<EOF
 AZURE_API_KEY=test-key
 AZURE_API_BASE=https://example.test
 AZURE_API_VERSION=2025-03-01-preview
-AZURE_DEPLOYMENT_OPUS=test-opus
-AZURE_DEPLOYMENT_FABLE=test-fable
+AZURE_DEPLOYMENT_SOL=test-sol
+AZURE_DEPLOYMENT_ASTRA=test-astra
+AZURE_DEPLOYMENT_LUNA=test-luna
 LITELLM_MASTER_KEY=test-key
 LITELLM_HOST=127.0.0.1
 LITELLM_PORT=${PORT}
-CODEX_MODEL_OPUS_ALIAS=opus
-CODEX_MODEL_FABLE_ALIAS=fable
+CODEX_MODEL_SOL_ALIAS=test-sol-alias
+CODEX_MODEL_ASTRA_ALIAS=test-astra-alias
+CODEX_MODEL_LUNA_ALIAS=test-luna-alias
 EOF
 cat >"${BIN_DIR}/codex" <<'EOF'
 #!/usr/bin/env bash
@@ -48,6 +50,7 @@ status=$?
 set -e
 [[ $status == 7 ]] || fail "exit code $status"
 grep -F "${TEST_DIR}/project|http://127.0.0.1:${PORT}/v1|test-key|" "${RUNS_FILE}" >/dev/null || fail 'Codex environment not preserved'
+grep -F 'model="test-sol-alias"' "${RUNS_FILE}" >/dev/null || fail 'default model not injected'
 [[ ! -f "${RUNTIME_DIR}/proxy.pid" ]] || fail 'proxy remained'
 
 echo 'Test: concurrent sessions share one proxy'
@@ -78,5 +81,19 @@ run_bounded 10 env ROOT_DIR=/nonexistent-root "${ROOT_DIR}/scripts/proxy-runtime
   || fail 'proxy-runtime.sh status did not finish'
 run_bounded 10 env ROOT_DIR=/nonexistent-root "${ROOT_DIR}/scripts/proxy-runtime.sh" stop \
   || fail 'proxy-runtime.sh stop did not finish'
+
+echo 'Test: the generated config exposes every model key'
+generated="${TEST_DIR}/generated.yaml"
+CODEX_AZURE_ENV_FILE="${ENV_FILE}" bash -c '
+  source "$1/scripts/ensure-env.sh"
+  for key in "${CODEX_MODEL_KEYS[@]}"; do
+    d="AZURE_DEPLOYMENT_${key}"; a="CODEX_MODEL_${key}_ALIAS"
+    printf "%s %s\n" "${!a}" "${!d}"
+  done
+  printf "default=%s\n" "${CODEX_DEFAULT_MODEL}"' _ "${ROOT_DIR}" >"${generated}"
+for pair in 'test-sol-alias test-sol' 'test-astra-alias test-astra' 'test-luna-alias test-luna'; do
+  grep -Fx "${pair}" "${generated}" >/dev/null || fail "model mapping missing: ${pair}"
+done
+grep -Fx 'default=test-sol-alias' "${generated}" >/dev/null || fail 'default model is not the SOL alias'
 
 echo 'All lifecycle tests passed.'

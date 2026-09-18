@@ -39,8 +39,9 @@ make setup
 AZURE_API_KEY=
 AZURE_API_BASE=https://your-resource.openai.azure.com
 AZURE_API_VERSION=2025-03-01-preview
-AZURE_DEPLOYMENT_OPUS=
-AZURE_DEPLOYMENT_FABLE=
+AZURE_DEPLOYMENT_SOL=
+AZURE_DEPLOYMENT_ASTRA=
+AZURE_DEPLOYMENT_LUNA=
 LITELLM_MASTER_KEY=sk-local-codex-proxy
 ~~~
 
@@ -60,11 +61,25 @@ codex-azure
 
 확인된 것:
 
-- `make test` — alias `opus`(deployment `gpt-sol`), `fable`(deployment `gpt-astra`) 모두 `/v1/responses` 200 + `output_text` 반환
+- `make test` — 노출 alias 전부 `/v1/responses` 200 + `output_text` 반환. issue #3 이후로는 `gpt-5.6-sol`(`gpt-sol`), `gpt-6-astra`(`gpt-astra`), `gpt-5.6-luna`(`gpt-luna`) 세 개
 - streaming — SSE `response.output_text.delta` 9건 포함, `response.completed`까지 정상 종료
 - function tool call — `get_weather` 스펙 전달 시 `function_call` + `{"city":"Seoul"}` 인자 반환. `azure/responses/` 라우팅과 `base_model: azure/gpt-5` 설정이 의도대로 동작
 - Codex 실전 — `codex exec`로 셸 tool call 왕복 성공, managed proxy 자동 시작(4020) 및 세션 종료 시 자동 종료 확인
 - 격리 — Claude Code 프록시(4010)는 영향 없음, 종료 후 `make status`는 `stopped`, 활성 세션 0
+
+## 모델 설정 키 (issue #3)
+
+deployment와 alias 변수를 모델 별칭 기준으로 다시 명명하고, 쓰이지 않던 `gpt-luna`까지 노출했습니다.
+
+| `.env` 키 | Azure deployment | Codex가 보는 이름 |
+| --- | --- | --- |
+| `AZURE_DEPLOYMENT_SOL` | `gpt-sol` | `gpt-5.6-sol` (기본 모델) |
+| `AZURE_DEPLOYMENT_ASTRA` | `gpt-astra` | `gpt-6-astra` |
+| `AZURE_DEPLOYMENT_LUNA` | `gpt-luna` | `gpt-5.6-luna` |
+
+모델 목록은 `scripts/ensure-env.sh`의 `CODEX_MODEL_KEYS` 한 곳에서 나오고, `start-proxy.sh`와 `test-proxy.sh`가 그 배열을 순회합니다. 이전 이름(`OPUS`, `FABLE`)과 별칭(`opus`, `fable`)은 남아 있지 않습니다.
+
+Codex TUI `/model` 목록에는 아직 안 뜹니다. `codex_models_manager`가 `{"models": [...]}`를 기대하는데 LiteLLM은 `{"data": [...]}`로 응답해서 목록 갱신이 실패하고 내장 프리셋만 남습니다. `-m` 지정 경로는 정상입니다. 별도 작업으로 다룹니다.
 
 ## 포트/키 충돌 주의 (issue #1에서 실제로 발생)
 
