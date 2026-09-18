@@ -34,7 +34,7 @@ AZURE_DEPLOYMENT_OPUS=your-primary-deployment
 AZURE_DEPLOYMENT_FABLE=your-secondary-deployment
 
 LITELLM_HOST=127.0.0.1
-LITELLM_PORT=4000
+LITELLM_PORT=4020
 LITELLM_MASTER_KEY=sk-local-codex-proxy
 
 CODEX_MODEL_OPUS_ALIAS=opus
@@ -63,7 +63,7 @@ codex-azure
 
 런처는 실행 시 Codex 설정 오버라이드를 주입합니다.
 
-- `OPENAI_BASE_URL=http://127.0.0.1:4000/v1`
+- `OPENAI_BASE_URL=http://127.0.0.1:4020/v1`
 - `OPENAI_API_KEY=$LITELLM_MASTER_KEY`
 - OpenAI Responses wire
 - 기본 모델 alias
@@ -90,6 +90,8 @@ make stop
 - Responses API를 사용하므로 `AZURE_API_VERSION`은 `2025-03-01-preview` 이상을 사용합니다.
 - `LITELLM_MASTER_KEY`는 로컬 프록시 인증 키이며 Azure 키가 아닙니다.
 - `LITELLM_HOST`는 기본값 `127.0.0.1`을 유지하세요.
+- `LITELLM_PORT`는 다른 프로세스가 쓰지 않는 포트를 고르세요. Docker가 4000을, 같은 방식의 Claude Code 프록시가 4010을 쓰는 경우가 많습니다.
+- Claude Code 프록시와 함께 쓴다면 `LITELLM_PORT`와 `LITELLM_MASTER_KEY`를 서로 다르게 두세요. 값이 같으면 이 런처가 그 프록시를 "호환되는 외부 프록시"로 보고 재사용하며, alias가 달라 model not found로 실패합니다.
 - Azure API key는 `.env`에만 두고 Git에 커밋하지 마세요.
 - 모델 오류가 나면 먼저 `make test`로 프록시를 확인한 뒤 Codex를 실행하세요.
 
