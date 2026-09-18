@@ -62,7 +62,7 @@ codex-azure
 
 확인된 것:
 
-- `make test` — alias `gpt-5.6-sol`(deployment `gpt-sol`), `gpt-6-astra`(deployment `gpt-astra`) 모두 `/v1/responses` 200 + `output_text` 반환
+- `make test` — alias `opus`(deployment `gpt-sol`), `fable`(deployment `gpt-astra`) 모두 `/v1/responses` 200 + `output_text` 반환
 - streaming — SSE `response.output_text.delta` 9건 포함, `response.completed`까지 정상 종료
 - function tool call — `get_weather` 스펙 전달 시 `function_call` + `{"city":"Seoul"}` 인자 반환. `azure/responses/` 라우팅과 `base_model: azure/gpt-5` 설정이 의도대로 동작
 - Codex 실전 — `codex exec`로 셸 tool call 왕복 성공, managed proxy 자동 시작(4020) 및 세션 종료 시 자동 종료 확인
